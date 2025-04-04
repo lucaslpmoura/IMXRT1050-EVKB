@@ -137,18 +137,210 @@ Otherwise, you might build a different project and get unexpected results. It is
 ### Examples
 <details>
 <summary> Minimalistic Code </summary>
+
+> ```C++
+> //Sample program that prints "Hello, World!" to the serial output
+>
+> #include "board.h"
+> #include "pin_mux.h"
+> 
+>
+> int main(void) { 
+>   
+>   // Hadware Initialization
+>   BOARD_ConfigMPU();
+>   BOARD_InitBootPins();
+>   BOARD_InitBootClocks();
+>   BOARD_InitDebugConsole();
+>
+>   /* Just enable the trace clock, leave coresight initialization to IDE debugger */
+>   SystemCoreClockUpdate();
+>   CLOCK_EnableClock(kCLOCK_Trace);
+>
+>
+>   bool running = true;
+>
+>   while(running){
+>       PRINTF("Hello, world!"); // Macro used to print to the serial console (UART/Semihosting)"
+>       running = false;
+>   }
+> }
+> ```
 </details>
 
 <details>
 <summary> LED Blink using interrupt </summary>
+
+> There is one Led on the board that can be interfaced by the user. This program flahes it every second.
+
+> ```C++
+> /* 
+> * This program uses the Systick interrupt to blink the on-board Led.
+> * The interrupt can be configured to trigger repeatedly after an number of system ticks.
+> */
+>
+> #include <stdint.h>
+> #include "board.h"
+> 
+> //The user Led is at GPIO1, Pin 9
+> #define LED0_GPIO GPIO1
+> #define LED0_GPIO_PIN 9U
+>
+> uint32_t systick_counter = 0; // Global counter used for timing the interrupt
+> bool led_state = false;  // Current Led state, False is OFF an True is ON
+>
+> /*
+> * Function called every time the Systick interrupt is triggered
+> * Decreases the global counter if it is bigger than 0
+> */
+>  void SysTick_Handler(void){
+>   if(systick_counter > 0){
+>       systick_counter--; 
+>   }
+>  }
+>   
+>  // Blocks executions for the specified number of milliseconds
+>  void Systick_Delay(uint32_t time_ms) {
+>   systick_counter = time_ms;
+>   
+>   while(systick_counter > 0){
+>       // Wait for systic_counter to reach 0. 
+>   } 
+>  }
+>
+> // Toggles the current state of the Led
+> void Led_Toggle(void){
+>   if(led_State){
+>       // Writing 1 to its GPIO pin turns it off
+>       GPIO_PinWrite(LED0_GPIO, LED0_GPIO_PIN, 1U) 
+>   }else{
+>        GPIO_PinWrite(LED0_GPIO, LED0_GPIO_PIN, 0U)
+>   }
+>
+>   led_state = !led_state;
+>  }
+>
+>
+> int main(void) {
+>    
+>   bool running = true; //Running flag
+>
+>   //Hardware Initialization     
+>   BOARD_ConfigMPU();
+>   BOARD_InitBootPins();
+>   BOARD_InitBootClocks();
+>   /* Update the core clock */
+>   SystemCoreClockUpdate();
+>   
+>   //Configures the Systick interrupt to trigger every 1 ms (1000 μs)   
+>   if(SysTick_Config(SystemCoreClok / 1000U)){
+>       //Error Handling
+>       running = false;
+>   }
+>   
+>   while(running){
+>       //Waits for a 1000 ms (1 s)
+>       Systick_delay(1000);
+>       Led_Toggle(); // Toggles the Led_State Every Second    
+>   }
+>   
+>
+>
+>
+>
+> }
+> ```
+
 </details>
 
 <details>
 <summary> Interrupt triggered by pressing a button. </summary>
+
+> The board features one push button (SW8) that can be used by the user.
+> You can configure an interrupt to trigger when it is pressed.
+
+```C++
+
+#include "fsl_debug_console.h"
+#include "fsl_gpio.h"
+#include "fsl_common.h"
+#include "app.h"
+#include "pin_mux.h"
+#include "board.h"
+
+
+#define SW8_GPIO GPIO5 // GPIO 5
+#define SW8_GPIO_PIN  0U // Pin 0 
+#define SW8_IRQ GPIO5_Combined_0_15_IRQn // SW8 System IRQ
+#define SW8_IRQHandler GPIO5_Combined_0_15_IRQHandler // System name of the function called by the IRQ
+
+volatile bool sw_pressed = false; // Flag that carries the current state of the switch; False = Not Pressed
+
+
+// Function Called by the Button interrupt
+void SW8_IRQHandler(void) {
+    
+    GPIO_PortClearInterruptFlags(SW8_GPIO, 1U << SW8_GPIO_PIN); // Clears Interrupt status
+
+    sw_pressed = true; // Tells the program the switch was pressed.
+    SDK_ISR_EXIT_BARRIER; // DSB instruction. See https://developer.arm.com/documentation/dui0646/c/The-Cortex-M7-Instruction-Set/Miscellaneous-instructions/DSB
+}
+
+// Ad-hoc delay function. Use a big while loop or somthing like that.
+void delay(void){
+    //wait for a while...
+}
+
+int main(void) {
+
+    bool running = true;
+
+     /*
+      Define the init structure for the input switch pin 
+      See fsl_gpio.h for more configuration options.
+     */
+    gpio_pin_config_t sw_config = {
+        kGPIO_DigitalInput,
+        0,
+        kGPIO_IntRisingEdge,
+    };
+
+    // Hadware Initialization
+    BOARD_ConfigMPU();
+    BOARD_InitBootPins();
+    BOARD_InitBootClocks();
+    BOARD_InitDebugConsole();
+
+    EnableIRQ(SW8_IRQ); // Enables the IRQ Flag 
+    GPIO_PinInit(SW8_GPIO, SW8_GPIO_PIN, &sw_config); // Initializes de GPIO and Pin using configuration defined by the user
+
+    GPIO_PortEnableInterrupts(SW8_GPIO, 1u << SW8_GPIO_PIN); // Enables interrupts for the GPIO an Pin of SW8
+
+    while(running){
+        if(sw_pressed){
+            // Software debouncing
+            delay(); 
+
+            if(GPIO_PinRead(SW8_GPIO, SW8_GPIO_PIN) == 1){
+                PRINTF("SW8 is pressed."); // Macro that prints to serial output (UART/Semihosting)
+            } 
+
+            sw_pressed = false;
+        }
+    }
+
+}
+``` 
 </details>
 
 <details>
 <summary> LED control using UART for user interface. </summary>
+
+> Example that combines the previous two. <br>
+> Creates a serial interface for the user where they can control the led manualy, or have it blink. <br>
+> Blinking speed can be adjusted by pressing the user button (SW8). <br>
+>
+> Avaiable at [https://github.com/lucaslpmoura/imxrt1050-evkb-test-program](https://github.com/lucaslpmoura/imxrt1050-evkb-test-program)
 </details>
 
 <br>
