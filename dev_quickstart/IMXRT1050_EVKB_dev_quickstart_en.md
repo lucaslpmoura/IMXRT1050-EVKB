@@ -340,7 +340,17 @@ int main(void) {
 > Creates a serial interface for the user where they can control the led manualy, or have it blink. <br>
 > Blinking speed can be adjusted by pressing the user button (SW8). <br>
 >
-> Avaiable at [https://github.com/lucaslpmoura/imxrt1050-evkb-test-program](https://github.com/lucaslpmoura/imxrt1050-evkb-test-program)
+> Avaiable at [https://github.com/lucaslpmoura/MIMRXT1052_Serial_Led_Control](https://github.com/lucaslpmoura/MIMRXT1052_Serial_Led_Control)
+</details>
+
+<details>
+ <summary>Ecompass readings over HTTP</summary>
+
+ > Reads the data from the onboard FXOS8700CQ Ecompass and sends it over HTTP to
+ > an webpage.
+>  You can see the details on the repository readme.
+>
+> Avaiable at [https://github.com/lucaslpmoura/IMRXT1050_Ecompass](https://github.com/lucaslpmoura/IMRXT1050_Ecompass)
 </details>
 
 <br>
