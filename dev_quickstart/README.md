@@ -124,10 +124,19 @@ Otherwise, you might build a different project and get unexpected results. It is
 > Recommendations before starting a new debugging process (MCUXpresso) <br>
  > > Before starting a new Debug process, make sure that the previous debug is terminated - if you are not sure about terminating,
 (the red squares for Terminate should "disappear" from the toolbars); otherwise, it may happen that pegdbserver, running as a background process, will not terminate properly and it will have to be removed before starting a new Debug process (e.g. using the Task Manager in Windows).
+
+</li>
+<li>
+
+> Peripherals Configuration
+> > To configure an onboard perihperal (LPI2C, LPGPIO) it is advised to use the config tools avaiable at the MCUXpresso IDE. There, you can configure everything,
+> > including pin routings, and the software generates the startup code for you.
+> > However, for more complex and/or specific applications, it could be better to understand the configuration masks, because the peripheral tool can be a bit confusing and limiting,
+> > not allowing to change pin directions, for example.
 </li>
 </ul>
-</details>
 
+</details>
 <!-- 
 <details>
 <summary>Further (manuals, etc.)</summary>
@@ -341,6 +350,15 @@ int main(void) {
 > Blinking speed can be adjusted by pressing the user button (SW8). <br>
 >
 > Avaiable at [https://github.com/lucaslpmoura/imxrt1050-evkb-test-program](https://github.com/lucaslpmoura/imxrt1050-evkb-test-program)
+</details>
+
+<details>
+<summary>Ecomppas with HTTP server</summary>
+
+> Takes samples from the onboard FXOS8700CQ Ecompass and sends it
+> through an Rest API to an web page using HTTP.
+>
+> Avaiable at [https://github.com/lucaslpmoura/IMRXT1050_Ecompass](https://github.com/lucaslpmoura/IMRXT1050_Ecompass)
 </details>
 
 <br>
