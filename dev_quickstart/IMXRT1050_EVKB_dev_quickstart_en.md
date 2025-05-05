@@ -343,6 +343,16 @@ int main(void) {
 > Avaiable at [https://github.com/lucaslpmoura/MIMRXT1052_Serial_Led_Control](https://github.com/lucaslpmoura/MIMRXT1052_Serial_Led_Control)
 </details>
 
+<details>
+ <summary>Ecompass readings over HTTP</summary>
+
+ > Reads the data from the onboard FXOS8700CQ Ecompass and sends it over HTTP to
+ > an webpage.
+>  You can see the details on the repository readme.
+>
+> Avaiable at [https://github.com/lucaslpmoura/IMRXT1050_Ecompass](https://github.com/lucaslpmoura/IMRXT1050_Ecompass)
+</details>
+
 <br>
 You are also encouraged to look into the examples provided by the SDK.
 
